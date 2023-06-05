@@ -4,78 +4,29 @@ using UnityEngine;
 
 public class TowerToTowerLine : MonoBehaviour
 {
-    Vector3 target;
-    Vector3 target1;
-    Vector3 mousePos;
-
-    private bool isBlue;
-    LineRenderer line;
+    EdgeCollider2D edgeCollider;
+    LineRenderer myline;
 
     private void Start()
     {
-        line = GetComponent<LineRenderer>();
+        edgeCollider = GetComponent<EdgeCollider2D>();
+        myline = GetComponent<LineRenderer>();
     }
 
-    private void OnMouseDown()
+    private void Update()
     {
-        ScreenMouseRay();
+        SetEdgesCollider(myline);
     }
 
-    void ScreenMouseRay()
+    void SetEdgesCollider(LineRenderer line)
     {
+        List<Vector2> edges = new();
 
-        mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
-        if (hit)
+        for (int i = 0; i < line.positionCount; i++)
         {
-            isBlue = hit.collider.gameObject.CompareTag("blue");
-            if (isBlue)
-            {
-                target = hit.collider.gameObject.transform.position;
-            }
+            Vector2 lineRendererPoint = line.GetPosition(i);
+            edges.Add(new Vector2(lineRendererPoint.x, lineRendererPoint.y));
         }
-    }
-
-    private void OnMouseDrag()
-    {
-        TargetToTowerLine();
-    }
-
-    private void OnMouseUp()
-    {
-        CheckTower();
-    }
-
-    void CheckTower()
-    {
-        mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
-        if (hit)
-        {
-            target1 = hit.collider.gameObject.transform.position;
-            DrawLine();
-        }
-        if (!hit)
-        {
-            line.SetPosition(1, target);
-            Destroy(gameObject, 1f);
-        }
-
-
-
-
-    }
-
-    void TargetToTowerLine()
-    {
-        mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        target1 = new Vector3(mousePos.x, mousePos.y, 0f);
-        DrawLine();
-    }
-
-    void DrawLine()
-    {
-        line.SetPosition(0, target);
-        line.SetPosition(1, target1);
+        edgeCollider.SetPoints(edges);       
     }
 }
