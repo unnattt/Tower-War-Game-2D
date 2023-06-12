@@ -1,10 +1,24 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
-public class TowerBehaviour : TowerManager
+public class TowerBehaviour : MonoBehaviour
 {
-    public bool isOccupied;    
+    public Color myColor;
+
+    int Level1 = 0;
+    int Level2 = 10;
+    int level3 = 30;
+
+     TextMeshPro CurrentLevel;
+
+    private void Start()
+    {
+        CurrentLevel = GetComponent<TextMeshPro>();
+        CurrentLevel.text = level3.ToString();
+    }
+
 }
 
 

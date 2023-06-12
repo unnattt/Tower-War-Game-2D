@@ -40,8 +40,8 @@ public class LinesScript : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         Debug.Log("LineDestroy");
-        LineSpwaner.inst.LineObjectSpwaner();
         Destroy(gameObject, 0);
+        LineSpwaner.inst.LineObjectSpwaner();
     }
 
 
