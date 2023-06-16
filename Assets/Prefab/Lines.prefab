@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bdf25cd2e4834627ad642ed3282fd83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myline: {fileID: 5218001321424080603}
+  ofTower: {fileID: 0}
 --- !u!120 &5218001321424080603
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -86,10 +88,10 @@ LineRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -1
+  m_SortingOrder: -2
   m_Positions:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 1}
+  - {x: 0.03, y: -2.75, z: 0}
+  - {x: 0.03, y: -2.75, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 2

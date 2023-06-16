@@ -6,17 +6,24 @@ public class LinesScript : MonoBehaviour
 {
     EdgeCollider2D edgeCollider;
     public LineRenderer myline;
+    public TowerBehaviour source;
+    public TowerBehaviour destination;
+    //public bool isLineUsed;
 
     private void Start()
     {
         edgeCollider = GetComponent<EdgeCollider2D>();
-        myline = GetComponent<LineRenderer>();
     }
+
+    //private void OnEnable()
+    //{
+    //    Debug.Log("From Line Script");
+    //    isLineUsed = false;
+    //}
 
     private void Update()
     {
         SetEdgesCollider(myline);
-
     }
 
     void SetEdgesCollider(LineRenderer line)
@@ -37,11 +44,17 @@ public class LinesScript : MonoBehaviour
         myline.SetPosition(1, endPos);
     }
 
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("LineDestroy");
-        Destroy(gameObject, 0);
-        LineSpwaner.inst.LineObjectSpwaner();
+        if (collision.gameObject.CompareTag("trail"))
+        {
+            Debug.Log("Name " + collision.gameObject.name);
+            source.RemoveLines(this);
+            //source.countLinesForSoliders--;            
+            Destroy(gameObject);
+            Debug.Log("LineDestroy");
+        }
     }
 
 

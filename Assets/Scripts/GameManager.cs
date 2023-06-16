@@ -6,27 +6,28 @@ public class GameManager : MonoBehaviour
 {
     public Color myColor;
 
-    GameObject spwan;
     GameObject Source;
-    Vector3 Destination;
+    GameObject Destination;
     Vector3 mousePos;
 
+    //List<Vector3> _destinations;
     public GameObject trailObject;
     public TrailRenderer myline;
-    public GameObject SoliderPrefab;
+    public LinesScript tempLine;
 
-    public bool isUpdate;
+    TowerBehaviour tower;
+
+    public bool isTrailOn;
     private bool isBlue;
     private bool isEnemyTower;
 
-    int i = 0;
 
     private void Start()
     {
-        isUpdate = true;
+        isTrailOn = true;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
@@ -35,7 +36,7 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetMouseButton(0))
         {
-            if (isUpdate == true)
+            if (isTrailOn == true)
             {
                 TrialRendererOn();
             }
@@ -46,7 +47,7 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetMouseButtonUp(0))
         {
-            if (isUpdate == true)
+            if (isTrailOn == true)
             {
                 TrialRendererOff();
             }
@@ -91,41 +92,31 @@ public class GameManager : MonoBehaviour
             isBlue = t.myColor == myColor;
             if (isBlue)
             {
-                isUpdate = false;
+                isTrailOn = false;
                 Source = hit.collider.gameObject;
-                LineSpwaner.inst.LineObjectSpwaner();
+                tower = Source.GetComponent<TowerBehaviour>();
             }
         }
         else
         {
-            isUpdate = true;
+            isTrailOn = true;
         }
-
     }
 
     public void CheckTowerIsDestination()
     {
         mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
-        if (hit.collider != null)
+        Debug.LogWarning("hit: " + hit.collider.name);
+        Debug.LogWarning("SOurce: " + Source.name);
+        if (hit.collider != null && hit.collider != Source && hit.collider.GetComponent<TowerBehaviour>())
         {
-            Debug.Log("is hit on up: " + hit.collider.gameObject.name);
-            TowerBehaviour t = hit.collider.gameObject.GetComponent<TowerBehaviour>();
-            if (t == null)
+            Destination = hit.collider.gameObject;
+            if (tower.CanMakeNewLine())
             {
-                return;
+                tower.AddLines(Source.transform.position, Destination.transform.position);
             }
-
-            isEnemyTower = t.myColor == Color.Grey;
-            if (isEnemyTower)
-            {
-                Debug.Log("isEnemy made true count:" + i);
-                Destination = hit.collider.gameObject.transform.position;
-                LineSpwaner.inst.lines[i].DrawLine(Source.transform.position, Destination);
-                StartCoroutine(SoliderObjectSpwaner(Source.transform.position, Destination));
-                i++;
-                isUpdate = true;
-            }
+            isTrailOn = true;
         }
     }
 
@@ -134,26 +125,18 @@ public class GameManager : MonoBehaviour
         mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         if (Source != null)
         {
-            Destination = new Vector3(mousePos.x, mousePos.y, 0f);
-            LineSpwaner.inst.lines[i].DrawLine(Source.transform.position, Destination);
+            if (tower.CanMakeNewLine())
+            {
+                Vector3 Destination = new Vector3(mousePos.x, mousePos.y, 0f);
+                tempLine.DrawLine(Source.transform.position, Destination);
+            }
         }
     }
 
     void DestoryLine()
     {
-        Debug.Log("is Destroy");
-        Destroy(LineSpwaner.inst.lines[i].gameObject);
-        LineSpwaner.inst.LineObjectSpwaner();
-        i++;
-        isUpdate = true;
-    }
-
-    IEnumerator SoliderObjectSpwaner(Vector2 startPos, Vector2 endPos)
-    {
-        yield return new WaitForSeconds(0.2f);
-        spwan = Instantiate(SoliderPrefab, Source.transform.position, Source.transform.rotation);
-        spwan.transform.parent = Source.transform;
-        SolidersScript obj = spwan.GetComponent<SolidersScript>();
-        obj.StartCoroutine(obj.SoliderMovement(startPos, endPos, 1));
+        Debug.Log(" ResetLine");
+        tempLine.DrawLine(Source.transform.position, Source.transform.position);
+        isTrailOn = true;
     }
 }
