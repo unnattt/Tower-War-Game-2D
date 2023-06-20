@@ -7,14 +7,16 @@ public class TowerBehaviour : MonoBehaviour
 {
     public Color myColor;
 
+    //AllLevels Define;
     int Level1 = 5;
     int Level2 = 10;
-    int Level3 = 30;
+    int Level3 = 30;    
     int levelCount;
 
     [Header("All Int For Lines And Soliders")]
     public int tempLineCount = 1;
     public int countLinesForSoliders = 0;
+    public int currentLine = -1;
 
     [Header("Soliders")]
     public SolidersScript SoliderPrefab;
@@ -29,19 +31,23 @@ public class TowerBehaviour : MonoBehaviour
 
     [Header("LevelCount")]
     [SerializeField] TextMeshPro CurrentLevel;
-    
 
-    bool checkSolidersAlive;
+
+    [Header("LevelSpriteChangeArea")]
+    public SpriteRenderer[] towerSprite;
+    SpriteRenderer myCurrentSprite;
 
     private void Start()
     {
         CurrentLevel = GetComponentInChildren<TextMeshPro>();
         levelCount = int.Parse(CurrentLevel.text);
+        StartCoroutine(SoliderSpwanEverySec());
+        myCurrentSprite = GetComponent<SpriteRenderer>();
     }
 
     private void Update()
     {
-        levelCount = int.Parse(CurrentLevel.text);
+        levelCount = int.Parse(CurrentLevel.text);              
     }
 
     public bool CanMakeNewLine()
@@ -82,10 +88,8 @@ public class TowerBehaviour : MonoBehaviour
         LinesScript spwanLine = Instantiate(lineScriptPrefab, LineSpwanerPoint.transform.position, LineSpwanerPoint.transform.rotation);
         spwanLine.transform.parent = LineSpwanerPoint.transform;
         spwanLine.DrawLine(start, end);
-        spwanLine.source = this;        
-        lines.Add(spwanLine);
-        StartCoroutine(SoliderSpwanEverySec(start, end));
-        
+        spwanLine.source = this;
+        lines.Add(spwanLine);      
     }
 
     public void RemoveLines(LinesScript SpwanLine)
@@ -93,33 +97,48 @@ public class TowerBehaviour : MonoBehaviour
         lines.Remove(SpwanLine);
     }
 
-    public IEnumerator SoliderSpwanEverySec(Vector2 start,Vector2 end)
+    public IEnumerator SoliderSpwanEverySec()
     {
-        yield return new WaitForSeconds(1);
-        SolidersScript spwanSolider = Instantiate(SoliderPrefab, SolidersSpwanPoint.transform.position, SolidersSpwanPoint.transform.rotation);
-        spwanSolider.transform.parent = SolidersSpwanPoint.transform;
-        StartCoroutine(spwanSolider.SoliderMovement(start, end, 1f));
-        StartCoroutine(SoliderSpwanEverySec(start, end));
+        while (true)
+        {
+            yield return new WaitForSeconds(0.5f);
+
+            if (lines.Count > 0)
+            {
+                currentLine++;
+                if (currentLine < lines.Count)
+                {
+                    SolidersScript spwanSolider = Instantiate(SoliderPrefab, SolidersSpwanPoint.transform.position, SolidersSpwanPoint.transform.rotation);
+                    spwanSolider.transform.parent = SolidersSpwanPoint.transform;
+                    StartCoroutine(spwanSolider.SoliderMovement(lines[currentLine].myline.GetPosition(0), lines[currentLine].myline.GetPosition(1), 1f));
+                }
+                else
+                {
+                    currentLine = -1;
+                }
+            }           
+        }
     }
 
     public void AddPoint()
     {
-
+        levelCount++;
+        CurrentLevel.text = levelCount.ToString();
     }
 
     public void RemovePoint()
     {
-
+        if(levelCount < 0)
+        {
+            levelCount = 0;
+        }
+        levelCount--;
+        CurrentLevel.text = levelCount.ToString();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("soliders"))
-        {
-            checkSolidersAlive = collision.gameObject.GetComponent<SolidersScript>().Isdead == true;
-            if (checkSolidersAlive)
-                Destroy(collision.gameObject, 0.5f);
-        }
+       
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -129,30 +148,47 @@ public class TowerBehaviour : MonoBehaviour
             collision.gameObject.GetComponent<SolidersScript>().Isdead = true;
         }
     }
+
+    public void ChangeTowerColorAccordingToCurrentLevel(SolidersScript soliders)
+    {
+       if(levelCount <= 0 && soliders.mycolor != myColor)
+        {
+            myCurrentSprite.color = towerSprite[1].color;
+            myColor = Color.Blue;
+        }       
+
+       //else if(levelCount > 0)
+       // {
+       //     myCurrentSprite.color = towerSprite[1].color;
+       //     myColor = Color.Blue;
+       // }       
+    }
+
+   
 }
 
 
 
 
-    //int counter = 0;
-    //for (int i = 0; i < lines.Count; i++)
-    //{
-    //    Debug.Log("Loop " + i);
-    //    if (lines[i].isLineUsed == true)
-    //    {
-    //        Debug.Log("Loop true" + i);
-    //        counter++;
-    //    }
-    //}
-    //if (counter >= lineCount)
-    //{
-    //    canMakeLines = false;
-    //    return;
-    //}
-    //Debug.Log("pre");
-    ////spwanLine.isLineUsed = true;
-    //Debug.Log("post");
-    ////Debug.Log("Post1:" + spwanLine.isLineUsed);
+//int counter = 0;
+//for (int i = 0; i < lines.Count; i++)
+//{
+//    Debug.Log("Loop " + i);
+//    if (lines[i].isLineUsed == true)
+//    {
+//        Debug.Log("Loop true" + i);
+//        counter++;
+//    }
+//}
+//if (counter >= lineCount)
+//{
+//    canMakeLines = false;
+//    return;
+//}
+//Debug.Log("pre");
+////spwanLine.isLineUsed = true;
+//Debug.Log("post");
+////Debug.Log("Post1:" + spwanLine.isLineUsed);
 
 //void ManageSolidersAccordingToLines()
 //{

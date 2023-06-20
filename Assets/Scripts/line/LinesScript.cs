@@ -6,8 +6,7 @@ public class LinesScript : MonoBehaviour
 {
     EdgeCollider2D edgeCollider;
     public LineRenderer myline;
-    public TowerBehaviour source;
-    public TowerBehaviour destination;
+    public TowerBehaviour source;    
     //public bool isLineUsed;
 
     private void Start()

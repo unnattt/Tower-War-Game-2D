@@ -9,18 +9,17 @@ public class GameManager : MonoBehaviour
     GameObject Source;
     GameObject Destination;
     Vector3 mousePos;
-
-    //List<Vector3> _destinations;
+    
     public GameObject trailObject;
     public TrailRenderer myline;
+
     public LinesScript tempLine;
 
     TowerBehaviour tower;
-
+    
     public bool isTrailOn;
     private bool isBlue;
-    private bool isEnemyTower;
-
+    private bool isGround;
 
     private void Start()
     {
@@ -30,7 +29,7 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
-        {
+        {           
             GetTowerSource();
         }
 
@@ -65,14 +64,25 @@ public class GameManager : MonoBehaviour
     }
 
     public void TrialRendererOn()
-    {
-        trailObject.SetActive(true);
+    {        
         mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
-        if (hit)
+        RaycastHit2D hit = Physics2D.Raycast(mousePos,Vector2.zero);      
+        if (hit.collider != null)
         {
-            trailObject.transform.position = new Vector2(hit.point.x, hit.point.y);
-        }
+            Ground g = hit.collider.GetComponent<Ground>();
+            if(g== null)
+            {
+                Debug.Log("Ground is null");
+                return;
+            }
+
+            isGround = g.myColor == Color.None;
+            if (isGround)
+            {
+                trailObject.SetActive(true);
+                trailObject.transform.position = new Vector2(mousePos.x, mousePos.y);
+            }
+        }       
     }
 
     public void GetTowerSource()
@@ -80,7 +90,7 @@ public class GameManager : MonoBehaviour
 
         mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
-        if (hit)
+        if (hit.collider != null)
         {
             TowerBehaviour t = hit.collider.gameObject.GetComponent<TowerBehaviour>();
 
@@ -107,14 +117,22 @@ public class GameManager : MonoBehaviour
     {
         mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
-        Debug.LogWarning("hit: " + hit.collider.name);
-        Debug.LogWarning("SOurce: " + Source.name);
-        if (hit.collider != null && hit.collider != Source && hit.collider.GetComponent<TowerBehaviour>())
+        
+        if (hit.collider != null && hit.collider.GetComponent<TowerBehaviour>() && Vector2.Distance(tower.transform.position,mousePos) > 1)
         {
-            Destination = hit.collider.gameObject;
+            Debug.Log("Is Tower");
+            Destination = hit.collider.gameObject;            
             if (tower.CanMakeNewLine())
-            {
-                tower.AddLines(Source.transform.position, Destination.transform.position);
+            {              
+                for (int i = 0; i < tower.lines.Count; i++)
+                {
+                    if (Vector2.Distance(tower.lines[i].myline.GetPosition(1), Destination.transform.position) < 1f)
+                    {
+                        Debug.Log("destination SAme Return");
+                        return;
+                    }
+                }
+                tower.AddLines(Source.transform.position, Destination.transform.position);                
             }
             isTrailOn = true;
         }
